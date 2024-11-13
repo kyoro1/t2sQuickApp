@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>インド英語 TTS アプリ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .voice-selection {
+            margin-top: 20px;
+        }
+        .voice-selection label {
+            margin-right: 20px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>インド英語 Text-to-Speech アプリ</h1>
+    <form id="tts-form">
+        <textarea id="text-input" rows="4" placeholder="ここにテキストを入力してください"></textarea><br>
+        
+        <div class="voice-selection">
+            <label>
+                <input type="radio" name="voice" value="female" checked>
+                女性の声
+            </label>
+            <label>
+                <input type="radio" name="voice" value="male">
+                男性の声
+            </label>
+        </div>
+        
+        <button type="submit">音声生成</button>
+    </form>
+    <audio id="audio-player" controls></audio>
+
+    <script>
+        document.getElementById('tts-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const text = document.getElementById('text-input').value;
+            const voice = document.querySelector('input[name="voice"]:checked').value;
+
+            if (!text.trim()) {
+                alert('テキストを入力してください。');
+                return;
+            }
+
+            const response = await fetch('/synthesize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text, voice: voice }),
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const audioPlayer = document.getElementById('audio-player');
+                audioPlayer.src = url;
+                audioPlayer.play();
+            } else {
+                const error = await response.text();
+                alert('エラーが発生しました: ' + error);
+            }
+        });
+    </script>
+</body>
+</html>
